@@ -50,6 +50,14 @@ variable roles {
   description = "List of RKE-compliant roles for this node"
 }
 
+variable host_ns {
+  type        = "list"
+  description = "list of nameservers"
+}
+variable host_domain {
+  type        = "string"
+  description = "name of fqdn"
+}
 variable ssh_bastion_host {
   description = "Bastion SSH host"
   default = ""

@@ -35,7 +35,9 @@ locals {
       "internal_network_ip" = instance.network[local.internal_network_index].fixed_ip_v4
       "public_network_ip" = ( local.has_public_network )  ? instance.network[local.public_network_index].fixed_ip_v4 : ""
       "host" = (var.ssh_bastion_host == "" && local.has_public_network )  ? instance.network[local.public_network_index].fixed_ip_v4 : instance.network[local.internal_network_index].fixed_ip_v4
-      "roles" = var.roles
+      "roles" = var.roles,
+      "host_ns" =  var.host_ns,
+      "host_domain" =  var.host_domain,
     }
   ]
 }
