@@ -1,10 +1,10 @@
-# Create instance
+ # Create instance
 resource "openstack_compute_instance_v2" "instance" {
-  count       = "${var.node_count}"
+  count       = var.node_count
   name        = "${var.name_prefix}-${format("%03d", count.index)}"
-  image_name  = "${var.image_name}"
-  flavor_name = "${var.flavor_name}"
-  key_pair    = "${var.ssh_keypair}"
+  image_name  = var.image_name
+  flavor_name = var.flavor_name
+  key_pair    = var.ssh_keypair
 
   dynamic "network" {
     iterator = network_name
@@ -43,7 +43,7 @@ locals {
 }
 
 resource null_resource "prepare_nodes" {
-  count = "${var.node_count}"
+  count = var.node_count
 
   triggers = {
     instance_id = "${element(openstack_compute_instance_v2.instance.*.id, count.index)}"
@@ -52,13 +52,13 @@ resource null_resource "prepare_nodes" {
   provisioner "remote-exec" {
     connection {
       # External
-      bastion_host     = "${var.ssh_bastion_host}"
-      bastion_host_key = "${file(var.ssh_key)}"
+      bastion_host     = var.ssh_bastion_host
+      bastion_host_key = file(var.ssh_key)
 
       # Internal
-      host        = "${(var.ssh_bastion_host == "" && local.has_public_network )  ? openstack_compute_instance_v2.instance[count.index].network[local.public_network_index].fixed_ip_v4 : openstack_compute_instance_v2.instance[count.index].network[local.internal_network_index].fixed_ip_v4}"
-      user        = "${var.ssh_user}"
-      private_key = "${file(var.ssh_key)}"
+      host        = (var.ssh_bastion_host == "" && local.has_public_network )  ? openstack_compute_instance_v2.instance[count.index].network[local.public_network_index].fixed_ip_v4 : openstack_compute_instance_v2.instance[count.index].network[local.internal_network_index].fixed_ip_v4
+      user        = var.ssh_user
+      private_key = file(var.ssh_key)
     }
     inline = [
       "ip_addresses=\"${join(" ", var.ssh_allow_ip)}\" ",
