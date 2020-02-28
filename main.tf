@@ -61,20 +61,24 @@ resource null_resource "prepare_nodes" {
       private_key = file(var.ssh_key)
     }
     inline = [
-      "ip_addresses=\"${join(" ", var.ssh_allow_ip)}\" ",
-      "for i in $ip_addresses; do ufw allow from $i to any port 22; done ",
-      "echo 'y' | ufw enable",
-      "ufw status",
-      "exists=$(grep -c \"${var.ssh_alt_user}\" /etc/passwd)",
-      "if [ $exists -eq 0 ]; then",
-      "   adduser --disabled-password --gecos '' ${var.ssh_alt_user}",
-      "   usermod -aG sudo ${var.ssh_alt_user}",
-      "   mkdir -p $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh",
-      "   cp ~/.ssh/authorized_keys $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh/",
-      "   chmod 700 $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh",
-      "   chmod 600 $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh/authorized_keys",
-      "   chown -R ${var.ssh_alt_user}: $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh",
-      "fi",
+      "rm -f /tmp/create-user.sh",
+      "echo '' >> /tmp/create-user.sh",
+      "echo 'ip_addresses=\"${join(" ", var.ssh_allow_ip)}\" ' >> /tmp/create-user.sh",
+      "echo 'for i in $ip_addresses; do ufw allow from $i to any port 22; done ' >> /tmp/create-user.sh",
+      "echo 'echo 'y' | ufw enable' >> /tmp/create-user.sh",
+      "echo 'ufw status' >> /tmp/create-user.sh",
+      "echo 'exists=$(grep -c \"${var.ssh_alt_user}\" /etc/passwd)' >> /tmp/create-user.sh",
+      "echo 'if [ $exists -eq 0 ]; then' >> /tmp/create-user.sh",
+      "echo '   adduser --disabled-password --gecos \"\" ${var.ssh_alt_user}' >> /tmp/create-user.sh",
+      "echo '   usermod -aG sudo ${var.ssh_alt_user}' >> /tmp/create-user.sh",
+      "echo '   mkdir -p $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh' >> /tmp/create-user.sh",
+      "echo '   cp ~/.ssh/authorized_keys $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh/' >> /tmp/create-user.sh",
+      "echo '   chmod 700 $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh' >> /tmp/create-user.sh",
+      "echo '   chmod 600 $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh/authorized_keys' >> /tmp/create-user.sh",
+      "echo '   chown -R ${var.ssh_alt_user}: $(getent passwd ${var.ssh_alt_user} | cut -d: -f6)/.ssh' >> /tmp/create-user.sh",
+      "echo 'fi' >> /tmp/create-user.sh",
+      "sudo -i sh /tmp/create-user.sh",
+      "sudo -i rm -f /tmp/create-user.sh",
     ]
   }
 }
